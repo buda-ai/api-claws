@@ -34,7 +34,9 @@ const main = async () => {
   console.log('          style="width:400px;height:600px;border:0"></iframe>\n');
   console.log(`  expires ${hosted.expiresAt}`);
   console.log("  Iframe this URL verbatim — the token is in the hash fragment, so it is never");
-  console.log("  sent to a server with the page request. Strip the fragment and it stops working.\n");
+  console.log(
+    "  sent to a server with the page request. Strip the fragment and it stops working.\n",
+  );
 
   // ── Option B: your own UI. You get a token; you render the chat. ────────────
   const embedSession = await harness.mintEmbedToken(END_USER, 3_600);

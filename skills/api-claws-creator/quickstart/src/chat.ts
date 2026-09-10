@@ -7,8 +7,8 @@
  * Run: pnpm chat
  */
 
-import { createInterface } from "node:readline/promises";
 import process from "node:process";
+import { createInterface } from "node:readline/promises";
 import { ApiClawsClient, ApiClawsError } from "./client.ts";
 import { loadConfig } from "./config.ts";
 import { AgentHarness, provisionAgent } from "./harness.ts";

@@ -255,11 +255,7 @@ export class ApiClawsClient {
     agentId: string,
     input: MintEmbedInput,
   ): Promise<EmbedSession> {
-    return this.request(
-      "POST",
-      `/spaces/${spaceId}/agents/${agentId}/embed-sessions`,
-      input,
-    );
+    return this.request("POST", `/spaces/${spaceId}/agents/${agentId}/embed-sessions`, input);
   }
 
   /** Mint a hosted iframe URL. Iframe exactly what comes back, hash fragment included. */

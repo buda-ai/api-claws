@@ -69,16 +69,22 @@ const main = async () => {
   const first = await harness.ask("demo-user-1", "How do I reset my watch?");
   console.log(`    settled: ${first.status}${first.timedOut ? " (poll timed out)" : ""}`);
   if (first.timedOut) {
-    console.log("    The run is still going server-side. Re-run to read the result; do not resend.");
+    console.log(
+      "    The run is still going server-side. Re-run to read the result; do not resend.",
+    );
   } else {
     console.log(`\n    ${first.reply?.replace(/\n/g, "\n    ") ?? "<no reply>"}\n`);
     const usedDrive = /8 seconds|crown|charger/i.test(first.reply ?? "");
-    console.log(`    answer draws on the Drive file: ${usedDrive ? "yes" : "NO — check instructions"}`);
+    console.log(
+      `    answer draws on the Drive file: ${usedDrive ? "yes" : "NO — check instructions"}`,
+    );
   }
 
   step(5, "Second turn, same session — does it keep context?");
   const second = await harness.ask("demo-user-1", "How long do I hold it for again?");
-  console.log(`    settled: ${second.status}, same session: ${second.sessionId === first.sessionId}`);
+  console.log(
+    `    settled: ${second.status}, same session: ${second.sessionId === first.sessionId}`,
+  );
   if (!second.timedOut) {
     console.log(`\n    ${second.reply?.replace(/\n/g, "\n    ") ?? "<no reply>"}\n`);
   }
@@ -94,7 +100,9 @@ const main = async () => {
 main().catch((error: unknown) => {
   if (error instanceof ApiClawsError && error.isAuthFailure) {
     console.error("\nAuthentication failed. The key is wrong, truncated, expired, or deleted.");
-    console.error("Check it with: curl -s https://buda.im/api/v1/users/me -H \"Authorization: Bearer $BUDA_API_KEY\"");
+    console.error(
+      'Check it with: curl -s https://buda.im/api/v1/users/me -H "Authorization: Bearer $BUDA_API_KEY"',
+    );
   } else {
     console.error(`\n${error instanceof Error ? error.message : String(error)}`);
   }
