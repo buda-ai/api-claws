@@ -1,0 +1,21 @@
+{
+  "name": "api-claws-quickstart",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A runnable agent harness on Buda API Claws: provision, seed Drive, run a turn, poll, mint an embed token.",
+  "scripts": {
+    "demo": "tsx src/demo.ts",
+    "chat": "tsx src/chat.ts",
+    "embed": "tsx src/embed.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.5",
+    "typescript": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}
