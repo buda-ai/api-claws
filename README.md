@@ -40,9 +40,32 @@ Four rows. That is the whole job, and this repo walks through each one.
 
 ## Start here
 
+Install the skill, so your coding agent builds the integration with you:
+
 ```bash
-git clone https://github.com/buda-ai/api-claws.git
-cd api-claws/skills/api-claws-creator/quickstart
+npx skills add buda-ai/api-claws
+```
+
+That works across Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode, Zed and more —
+the installer detects what you have. Add `-g` to install for every project instead of this one,
+and `npx skills update` to pull later changes.
+
+Then ask for what you are actually building:
+
+> Add an AI support agent to our smartwatch companion app. Each customer should get their own
+> isolated agent that answers from our device manuals.
+
+Prefer to read before you install? Everything is in
+[`skills/api-claws-creator/SKILL.md`](skills/api-claws-creator/SKILL.md).
+
+## Run the quickstart
+
+The skill ships with a runnable harness. After installing, it is at
+`.agents/skills/api-claws-creator/quickstart` — or clone this repo and use
+`skills/api-claws-creator/quickstart`:
+
+```bash
+cd .agents/skills/api-claws-creator/quickstart
 cp .env.example .env      # add your sk_ key from Settings → API Keys
 pnpm install
 pnpm demo
@@ -54,27 +77,6 @@ token — six checks, one command.
 
 Then `pnpm chat` for the turn loop with a human in it, and `pnpm embed` for the two ways to reach
 a frontend that cannot hold your API key.
-
-## Use it with your coding agent
-
-`skills/api-claws-creator` is an agent skill. Install it so your agent can build the integration
-with you:
-
-```bash
-# Claude Code — for one project
-mkdir -p .claude/skills && cp -r skills/api-claws-creator .claude/skills/
-
-# Claude Code — everywhere
-mkdir -p ~/.claude/skills && cp -r skills/api-claws-creator ~/.claude/skills/
-```
-
-Other agents that read `SKILL.md` conventions work the same way; point them at
-`skills/api-claws-creator/SKILL.md`.
-
-Then ask for what you are actually building:
-
-> Add an AI support agent to our smartwatch companion app. Each customer should get their own
-> isolated agent that answers from our device manuals.
 
 ## What is inside
 
