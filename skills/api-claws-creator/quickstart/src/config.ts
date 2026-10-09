@@ -32,11 +32,25 @@ const loadDotEnv = (): void => {
   }
 };
 
+const parsePositiveInt = (value: string | undefined, fallback: number): number => {
+  if (value === undefined || value.trim() === "") return fallback;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`Expected a positive integer, got "${value}"`);
+  }
+  return parsed;
+};
+
 export interface Config {
   apiKey: string;
   baseUrl: string;
-  spaceName: string;
+  /** Pin a Space. Unset = the account's API Claws Developer Space. */
+  spaceId?: string;
+  /** Where the account owner enables API Claws and tops up credits. */
+  developerCenterUrl: string;
   agentName: string;
+  /** How long to poll a turn before stopping. The run itself keeps going server-side. */
+  pollTimeoutMs: number;
 }
 
 export const loadConfig = (): Config => {
@@ -52,10 +66,13 @@ export const loadConfig = (): Config => {
     );
   }
 
+  const baseUrl = process.env.BUDA_API_BASE_URL ?? "https://buda.im/api/v1";
   return {
     apiKey,
-    baseUrl: process.env.BUDA_API_BASE_URL ?? "https://buda.im/api/v1",
-    spaceName: process.env.QUICKSTART_SPACE_NAME ?? "API Claws Quickstart",
+    baseUrl,
+    spaceId: process.env.QUICKSTART_SPACE_ID?.trim() || undefined,
+    developerCenterUrl: `${new URL(baseUrl).origin}/developer`,
     agentName: process.env.QUICKSTART_AGENT_NAME ?? "Watch Assistant",
+    pollTimeoutMs: parsePositiveInt(process.env.QUICKSTART_POLL_TIMEOUT_MS, 180_000),
   };
 };

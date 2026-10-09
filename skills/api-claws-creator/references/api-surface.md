@@ -19,8 +19,12 @@ you need from "what am I trying to build".
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| GET | `/spaces` | `{ spaces[], total }`. List before creating, or retries duplicate tenants. |
-| POST | `/spaces` | Body `{ name, slug?, logo? }` → the Space. `201`. |
+| GET | `/spaces` | `{ spaces[], total }`. Each Space has `kind`: `developer` is the API Claws Developer Space (holds the credits), everything else is `workspace`. |
+| POST | `/spaces` | Body `{ name, slug?, logo? }` → an ordinary workspace Space. `201`. Always creates — list first. Not needed for API Claws itself (agents run in the Developer Space); an account may own one free workspace, so extra ones are refused with `403 FREE_OWNER_SPACE_LIMIT_REACHED`. |
+
+The Developer Space is created from the Developer Center (`/developer` → enable API Claws), not by
+this API. It has no free credits; runs in it fail with `API_CLAW_CREDITS_EXHAUSTED` until it is
+topped up.
 
 ## Agents
 
@@ -65,7 +69,7 @@ upload-url → confirm-upload pair.
 | --- | --- | --- |
 | POST | `/api-agents/{agentId}/sessions` | Body `{ message, title?, mode?, model?, startRun?, attachments? }`. `202` → `{ session, run }` |
 | GET | `/api-agents/{agentId}/sessions` | Query `limit? offset? status?` |
-| GET | `/api-agents/{agentId}/sessions/{sessionId}` | → `{ session, messages[], run: { status, streamUrl, cancelUrl } }` |
+| GET | `/api-agents/{agentId}/sessions/{sessionId}` | → `{ session, messages[], run: { status, streamUrl, cancelUrl } }`. A `failed` session has `session.error: { code, message }`. |
 | POST | `/api-agents/{agentId}/sessions/{sessionId}/messages` | Continue the conversation. `202` |
 | PATCH | `/api-agents/{agentId}/sessions/{sessionId}` | Rename |
 | DELETE | `/api-agents/{agentId}/sessions/{sessionId}` | Delete |
@@ -75,6 +79,10 @@ upload-url → confirm-upload pair.
 
 Session status: `pending | in_progress | waiting_for_input | completed | failed | cancelled`.
 Settled = the last four. `mode`: `agent | chat | thinking | build-app`.
+
+`session.error` is `null` unless the status is `failed`. Codes you should handle explicitly:
+`API_CLAW_CREDITS_EXHAUSTED` — the Developer Space credits are used up; the message links to the
+Developer Center top-up page. Retrying will not help.
 
 ## Frontend-safe access — Embed
 

@@ -32,6 +32,11 @@ export interface Space {
   logo: string | null;
   plan: string;
   role: string;
+  /**
+   * "developer" = the API Claws Developer Space from the Developer Center; it holds the credits.
+   * Absent on older servers — see resolveDeveloperSpace for the fallback.
+   */
+  kind?: "workspace" | "developer";
   createdAt: string;
 }
 
@@ -67,6 +72,8 @@ export interface ChatSession {
   createdAt: string;
   updatedAt: string;
   completedAt: string | null;
+  /** Why the run failed, when status is "failed" — e.g. API_CLAW_CREDITS_EXHAUSTED. */
+  error: { code: string; message: string } | null;
 }
 
 export interface ChatMessage {

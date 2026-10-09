@@ -124,11 +124,14 @@ symptom of missing refresh is that every long chat dies silently at the same ela
 - **Idle agents cost nothing.** You do not need to tear down agents between conversations. Resist
   the urge to build a pool.
 - **Credits are checked per Space**, not as a per-request rate limit. Watch balance, not QPS.
+  The Developer Space starts at zero and gets no free credits; at zero every run in it fails with
+  `API_CLAW_CREDITS_EXHAUSTED`, which you read from `session.error`.
 
 ## What to build first
 
 1. Key check (`/users/me`) — proves the boundary.
-2. Provision one Space + one Agent by hand, hardcode the IDs.
+2. Enable API Claws in the Developer Center and top it up; create one Agent in that Developer
+   Space by hand, hardcode the IDs.
 3. One turn, polled to a settled state, printed to stdout.
 4. Drive file, then a turn whose answer depends on it. **This is the moment the harness is real.**
 5. Only then: your database, your surface, your auth, your error states.

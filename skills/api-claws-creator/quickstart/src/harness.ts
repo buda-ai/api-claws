@@ -19,6 +19,24 @@ import {
   type Space,
 } from "./client.ts";
 
+/**
+ * The slice of the client the harness uses. Structural on purpose: pass the real ApiClawsClient,
+ * your own wrapper, or a test stub.
+ */
+export type HarnessClient = Pick<
+  ApiClawsClient,
+  | "createSession"
+  | "sendMessage"
+  | "getSession"
+  | "putDriveFile"
+  | "readDriveText"
+  | "createEmbedSession"
+  | "createEmbedUrl"
+>;
+
+/** The slice of the client provisioning uses. */
+export type ProvisioningClient = Pick<ApiClawsClient, "listSpaces" | "listAgents" | "createAgent">;
+
 // ── 1. Identity mapping ──────────────────────────────────────────────────────
 
 /**
@@ -60,6 +78,8 @@ export interface TurnResult {
   messages: ChatMessage[];
   /** True when polling gave up. The run is STILL GOING server-side — do not resend. */
   timedOut: boolean;
+  /** The server's reason when status is "failed" — e.g. API_CLAW_CREDITS_EXHAUSTED. */
+  error: { code: string; message: string } | null;
 }
 
 export interface PollOptions {
@@ -72,7 +92,7 @@ export interface PollOptions {
 }
 
 export interface HarnessOptions {
-  client: ApiClawsClient;
+  client: HarnessClient;
   agentId: string;
   spaceId: string;
   sessionStore?: SessionStore;
@@ -91,7 +111,7 @@ const latestAssistantReply = (messages: ChatMessage[]): string | undefined => {
 };
 
 export class AgentHarness {
-  private readonly client: ApiClawsClient;
+  private readonly client: HarnessClient;
   private readonly sessions: SessionStore;
   private readonly defaultMode: PromptMode;
   private readonly pollOptions: Required<Omit<PollOptions, "onStatus">> &
@@ -160,6 +180,7 @@ export class AgentHarness {
           reply: latestAssistantReply(detail.messages),
           messages: detail.messages,
           timedOut: false,
+          error: detail.session.error ?? null,
         };
       }
     }
@@ -171,6 +192,7 @@ export class AgentHarness {
       status: detail?.session.status ?? "in_progress",
       messages: detail?.messages ?? [],
       timedOut: true,
+      error: null,
     };
   }
 
@@ -228,20 +250,76 @@ export class AgentHarness {
 
 // ── Provisioning ─────────────────────────────────────────────────────────────
 
+/** The name the Developer Center gives the Developer Space when API Claws is enabled. */
+export const DEVELOPER_SPACE_DEFAULT_NAME = "API Claws";
+
+/** Provisioning cannot continue without something only the account owner can do. */
+export class ProvisioningError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ProvisioningError";
+  }
+}
+
 /**
- * Find or create the Space and Agent for one tenant.
+ * Pick the Space the agent runs in.
  *
- * POST /spaces always creates, so a naive retry grows duplicate tenants. Real provisioning keys
- * off YOUR customer record; this matches by name, which is enough to make the quickstart safely
- * re-runnable.
+ * API Claws agents belong in the Developer Space: the Space the Developer Center creates when you
+ * enable API Claws, which holds the API Claws credit balance. It is separate from your personal
+ * workspace, so this never calls POST /spaces (that creates ordinary workspaces).
+ */
+export const resolveDeveloperSpace = (
+  spaces: Space[],
+  options: { spaceId?: string; developerCenterUrl: string },
+): Space => {
+  if (options.spaceId) {
+    const chosen = spaces.find((space) => space.id === options.spaceId);
+    if (!chosen) {
+      throw new ProvisioningError(
+        `Space ${options.spaceId} is not one this API key can use. ` +
+          `Spaces it can use: ${spaces.map((space) => `${space.id} (${space.name})`).join(", ") || "none"}.`,
+      );
+    }
+    return chosen;
+  }
+
+  // Servers that predate `kind` do not report it at all. There, fall back to the name the
+  // Developer Center gives the Space it creates.
+  const serverReportsKind = spaces.some((space) => space.kind !== undefined);
+  const developerSpaces = serverReportsKind
+    ? spaces.filter((space) => space.kind === "developer")
+    : spaces.filter((space) => space.name === DEVELOPER_SPACE_DEFAULT_NAME);
+  if (developerSpaces.length === 1 && developerSpaces[0]) return developerSpaces[0];
+  if (developerSpaces.length === 0) {
+    throw new ProvisioningError(
+      "This account has no API Claws Developer Space yet. Open the Developer Center " +
+        `(${options.developerCenterUrl}), enable API Claws, top up its credits, then re-run.`,
+    );
+  }
+  throw new ProvisioningError(
+    "This account has more than one Developer Space. Set QUICKSTART_SPACE_ID to one of: " +
+      developerSpaces.map((space) => `${space.id} (${space.name})`).join(", "),
+  );
+};
+
+/**
+ * Find or create the agent in the Developer Space.
+ *
+ * Matching the agent by name keeps the quickstart safely re-runnable. Real provisioning keys off
+ * YOUR customer record and stores the returned IDs, so a retried deploy never creates twice.
  */
 export const provisionAgent = async (
-  client: ApiClawsClient,
-  input: { spaceName: string; agentName: string; instructions: string; emoji?: string },
+  client: ProvisioningClient,
+  input: {
+    spaceId?: string;
+    developerCenterUrl: string;
+    agentName: string;
+    instructions: string;
+    emoji?: string;
+  },
 ): Promise<{ space: Space; agent: ClawAgent; created: boolean }> => {
   const { spaces } = await client.listSpaces();
-  const existingSpace = spaces.find((space) => space.name === input.spaceName);
-  const space = existingSpace ?? (await client.createSpace({ name: input.spaceName }));
+  const space = resolveDeveloperSpace(spaces, input);
 
   const { agents } = await client.listAgents(space.id);
   const existingAgent = agents.find((agent) => agent.name === input.agentName);

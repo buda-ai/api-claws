@@ -62,21 +62,34 @@ Prefer to read before you install? Everything is in
 
 The skill ships with a runnable harness. After installing, it is at
 `.agents/skills/api-claws-creator/quickstart` — or clone this repo and use
-`skills/api-claws-creator/quickstart`:
+`skills/api-claws-creator/quickstart`.
+
+**Before you run it:**
+
+1. Create an API key: **Settings → API Keys** on [buda.im](https://buda.im) (shown once, prefixed
+   `sk_`).
+2. Enable API Claws in the **[Developer Center](https://buda.im/developer)**. That creates your
+   Developer Space — where the agent runs, separate from your personal workspace.
+3. Top up the Developer Space. It has no free credits, and every run fails with
+   `API_CLAW_CREDITS_EXHAUSTED` (with a link back to the top-up page) until it has some.
 
 ```bash
 cd .agents/skills/api-claws-creator/quickstart
-cp .env.example .env      # add your sk_ key from Settings → API Keys
+cp .env.example .env      # put your sk_ key in it
 pnpm install
 pnpm demo
 ```
 
-`pnpm demo` provisions a tenant, gives the agent a manual as durable memory, runs a real turn,
-polls it to a settled state, proves the answer draws on that memory, and mints a frontend-safe
-token — six checks, one command.
+`pnpm demo` performs six checks in order, and the first one that fails stops it with exit code 1
+and says why: the key resolves to your account, the Developer Space and Agent are found, a Drive
+file reads back exactly as written, a turn completes using a fact that exists only in that Drive
+file — **this is where the harness becomes real** — a second turn in the same session recalls
+something said only in conversation (proving memory, not a second Drive lookup), and an embed
+token is minted for that session.
 
-Then `pnpm chat` for the turn loop with a human in it, and `pnpm embed` for the two ways to reach
-a frontend that cannot hold your API key.
+Then `pnpm chat` for the turn loop with a human in it, `pnpm embed` for the two ways to reach a
+frontend that cannot hold your API key, and `pnpm test` for the offline suite covering every
+failure path above with no network calls.
 
 ## What is inside
 
@@ -87,11 +100,13 @@ skills/api-claws-creator/
 │   ├── api-surface.md                every endpoint, grouped by the harness job it does
 │   ├── harness-blueprint.md          the four parts you own, and the decisions behind them
 │   └── troubleshooting.md            the failure modes that cost the most time
-└── quickstart/                       a runnable harness in ~250 lines of TypeScript
+└── quickstart/                       a runnable, dependency-free TypeScript harness
     └── src/
         ├── client.ts                 dependency-free typed API client
         ├── harness.ts                identity mapping, turn loop, memory, credential boundary
-        ├── demo.ts                   the six checks
+        ├── demo-flow.ts              the six checks, as a function that fails fast
+        ├── demo-flow.test.ts         offline tests for every failure path, no network
+        ├── demo.ts                   runs the checks against the live API
         ├── chat.ts                   interactive terminal chat
         └── embed.ts                  frontend-safe access, both paths
 ```
@@ -105,8 +120,10 @@ Learned the hard way, covered in depth in
    `completed` spins until it times out while the agent sits there waiting for an answer.
 2. **A poll timeout is a display decision, not a run failure.** The run keeps going server-side.
    Say "still working" — resending starts a second run and the user sees the answer twice.
-3. **`POST /spaces` always creates.** Check before you provision, or a retried deploy grows
-   duplicate tenants.
+3. **API Claws runs in its own Developer Space, not your personal workspace.** A free account may
+   own only one personal workspace, so `POST /spaces` on it fails with
+   `FREE_OWNER_SPACE_LIMIT_REACHED` — your agents don't need it; they belong in the Developer
+   Space the Developer Center creates when you enable API Claws.
 
 ## Links
 

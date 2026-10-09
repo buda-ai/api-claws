@@ -2,6 +2,18 @@
 
 The failure modes that cost the most time, in the order you are likely to hit them.
 
+## Every run fails immediately, with no messages
+
+**Symptom:** the session goes straight to `failed`; `messages` is empty, not even your own message.
+
+**Cause:** read `session.error`. Almost always it is `API_CLAW_CREDITS_EXHAUSTED`: the Developer
+Space credits are used up, so the run is refused before it starts. The Developer Space gets no free
+credits.
+
+**Fix:** the error message carries the link — the Developer Center page with the top-up action
+(`https://buda.im/developer/api-agents`). Do not retry in a loop: nothing changes until the balance
+does, and every agent in that Space is stopped the same way.
+
 ## The poll loop never ends
 
 **Symptom:** your code waits until the deadline and reports a timeout, but the dashboard shows the
@@ -30,7 +42,8 @@ sessions *by design* but should not, those facts belong in Drive, not in convers
 
 **Check, in order:**
 1. Is it in the right agent's Drive? Two agents in the same Space have separate Drives.
-2. Do the `instructions` tell it to use Drive as the source of truth? A file the agent is never
+2. Do the `instructions` tell it to use Drive as the source of truth? Drive is **not** pasted into
+   the prompt — the agent reads files with its own tools when it decides to. A file it is never
    told to consult is just storage.
 3. Is the content actually text? Write markdown with `mimeType: "text/markdown"`; a binary blob
    is not readable knowledge.
@@ -38,12 +51,20 @@ sessions *by design* but should not, those facts belong in Drive, not in convers
    `POST /drive/text` and check what you actually stored — escaped `\n` written as literal
    backslash-n is a common one.
 
+## `403 FREE_OWNER_SPACE_LIMIT_REACHED` from `POST /spaces`
+
+This only happens when you create *extra* Spaces — API Claws itself runs in the Developer Space
+and never needs this call. `POST /spaces` creates an ordinary workspace owned by your account, and
+an account may own one free workspace (the one sign-up already made). Keep your agents in the
+Developer Space; per-customer workspaces need a plan that includes them.
+
 ## Duplicate Spaces after a deploy
 
 **Symptom:** your customer count in Buda is higher than your customer count.
 
-**Cause:** `POST /spaces` always creates. A retry, a restarted worker, or a double-fired webhook
-provisions again.
+**Cause:** `POST /spaces` always creates (on plans that allow more than one Space). A retry, a
+restarted worker, or a double-fired webhook provisions again. The same is true of
+`POST /api-agents`.
 
 **Fix:** make provisioning idempotent on your side — check your own database first, or
 `GET /spaces` and match by name/slug before creating. Store the returned `spaceId` in the same

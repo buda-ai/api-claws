@@ -19,7 +19,8 @@ const main = async () => {
   const client = new ApiClawsClient({ apiKey: config.apiKey, baseUrl: config.baseUrl });
 
   const { space, agent } = await provisionAgent(client, {
-    spaceName: config.spaceName,
+    spaceId: config.spaceId,
+    developerCenterUrl: config.developerCenterUrl,
     agentName: config.agentName,
     instructions: "You are a helpful assistant. Use your Drive files as the source of truth.",
   });
