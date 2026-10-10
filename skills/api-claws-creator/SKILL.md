@@ -31,6 +31,17 @@ knows your users, your product, and your surface.
 
 The four rows marked **You** are the entire job. Everything below is how to do them.
 
+## Visual starting point
+
+For a device companion, read the [smartwatch pattern](references/smartwatch-companion.md).
+The installed skill includes a standalone [HTML preview](assets/smartwatch-companion/demo.html)
+that needs no build, network connection, or API key. Open it locally, or copy the entire
+`assets/smartwatch-companion/` folder into your project before adapting the UI.
+
+The preview uses illustrative local data. It does not execute Agent runs, verify user isolation,
+or show a coding agent generating an app. Keep the existing device sync in your product and
+call API Claws from your backend. Use Step 7 to verify the actual integration.
+
 ## Before you start
 
 - An API key from **Settings → API Keys** in the Buda dashboard. It is shown once, prefixed `sk_`.

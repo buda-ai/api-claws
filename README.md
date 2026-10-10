@@ -58,6 +58,18 @@ Then ask for what you are actually building:
 Prefer to read before you install? Everything is in
 [`skills/api-claws-creator/SKILL.md`](skills/api-claws-creator/SKILL.md).
 
+## Try the HTML preview
+
+The installed skill includes a standalone preview at
+`.agents/skills/api-claws-creator/assets/smartwatch-companion/demo.html`. Open it directly in a
+browser to try workout sync, feedback, and plan review with illustrative data. It needs no build,
+network connection, or API key. Copy the whole `assets/smartwatch-companion/` folder when adapting
+it for your project so the logo stays with the HTML.
+
+When browsing this repository, use [`examples/smartwatch-companion/demo.html`](examples/smartwatch-companion/demo.html).
+Read the [smartwatch pattern](skills/api-claws-creator/references/smartwatch-companion.md) for
+the boundary between device sync, your backend, and API Claws. This preview does not call the API.
+
 ## Run the quickstart
 
 The skill ships with a runnable harness. After installing, it is at
@@ -96,10 +108,12 @@ failure path above with no network calls.
 ```
 skills/api-claws-creator/
 ├── SKILL.md                          seven steps, from key check to production checklist
+├── assets/smartwatch-companion/       standalone HTML preview and logo
 ├── references/
 │   ├── api-surface.md                every endpoint, grouped by the harness job it does
 │   ├── harness-blueprint.md          the four parts you own, and the decisions behind them
-│   └── troubleshooting.md            the failure modes that cost the most time
+│   ├── troubleshooting.md            the failure modes that cost the most time
+│   └── smartwatch-companion.md       device/app boundary and Agent-per-user pattern
 └── quickstart/                       a runnable, dependency-free TypeScript harness
     └── src/
         ├── client.ts                 dependency-free typed API client
