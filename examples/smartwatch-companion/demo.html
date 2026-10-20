@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stride - API Claws training companion</title>
+    <style>
+      :root { --ink:#202522; --muted:#717872; --line:#e0e5e0; --green:#28745b; --coral:#ce604b; --blue:#3156b4; }
+      * { box-sizing:border-box; }
+      [hidden] { display:none !important; }
+      body { margin:0; background:#f4f6f4; color:var(--ink); font:16px/1.5 Inter,system-ui,sans-serif; letter-spacing:0; }
+      button,input { font:inherit; }
+      button { cursor:pointer; color:inherit; }
+      button:disabled { cursor:default; opacity:.5; }
+      button:focus-visible,input:focus-visible { outline:3px solid #3156b4; outline-offset:3px; }
+      h1,h2,h3,p { margin:0; }
+      .icon { width:20px; height:20px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+      .video-heading,.video-footer { display:none; }
+      .app { max-width:1600px; margin:32px auto; background:white; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+      .topbar { min-height:78px; padding:18px 28px; display:flex; justify-content:space-between; align-items:center; gap:20px; border-bottom:1px solid var(--line); }
+      .brand,.top-actions,.section-title,.meta,.buttons,.goal,.row,.chat-title { display:flex; align-items:center; gap:12px; }
+      .brand img { width:34px; height:34px; }
+      .brand strong { font-size:24px; }
+      .brand small { color:var(--muted); font-size:14px; }
+      .badge { font-size:12px; font-weight:650; color:var(--muted); border:1px solid var(--line); border-radius:4px; padding:5px 9px; white-space:nowrap; }
+      .users { display:flex; border:1px solid var(--line); padding:3px; border-radius:6px; gap:3px; }
+      .users button { border:0; background:transparent; padding:6px 15px; border-radius:3px; font-size:14px; }
+      .users .active { background:#202522; color:white; }
+      .icon-button { display:grid; place-items:center; width:36px; height:36px; border:1px solid var(--line); background:white; border-radius:5px; }
+      .workspace { display:grid; grid-template-columns:240px minmax(0,1fr) 420px; min-height:660px; }
+      .device { background:#f8faf8; padding:30px 24px; border-right:1px solid var(--line); }
+      .eyebrow { font:650 11px/1.4 ui-monospace,monospace; text-transform:uppercase; color:var(--muted); }
+      .section-title { justify-content:space-between; margin-top:8px; }
+      .device h2 { font-size:20px; }
+      .synced { font-size:12px; color:var(--green); display:flex; align-items:center; gap:4px; }
+      .synced .icon { width:14px; height:14px; }
+      .watch { position:relative; width:168px; height:300px; margin:20px auto; display:grid; place-items:center; }
+      .strap { position:absolute; width:68px; inset:0 auto; border-radius:22px; background:#d4dacf; border:1px solid #b8c1b6; }
+      .watch-face { position:relative; width:164px; height:196px; padding:18px; background:#1d2520; color:white; border:8px solid #383f37; border-radius:34px; box-shadow:0 14px 20px #18221b22; }
+      .watch-face:after { content:""; position:absolute; right:-13px; top:48px; width:5px; height:22px; background:#687362; border-radius:0 3px 3px 0; }
+      .watch-time { color:#c2c9c0; font:12px ui-monospace,monospace; text-align:center; }
+      .run-ring { margin:13px auto 6px; width:94px; height:94px; border:5px solid #eead50; border-right-color:#53604b; border-radius:50%; display:grid; align-content:center; justify-items:center; }
+      .run-ring strong { font-size:31px; line-height:1.15; font-weight:600; }
+      .run-ring span { font-size:10px; color:#bac3b7; }
+      .watch-label { text-align:center; color:#bac3b7; font-size:9px; }
+      .device-stat { display:flex; justify-content:space-between; border-top:1px solid var(--line); padding:12px 0; font-size:13px; }
+      .device-stat span { color:var(--muted); }
+      .device-status { margin-top:22px; padding-top:20px; border-top:1px solid var(--line); }
+      .device-status p { margin-top:8px; color:var(--muted); font-size:13px; }
+      .training { padding:30px 34px; min-width:0; }
+      .greeting { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+      .greeting h1 { margin-top:8px; font-size:30px; font-weight:600; line-height:1.2; }
+      .avatar { display:grid; place-items:center; width:46px; height:46px; border-radius:50%; background:#eaf0f9; color:var(--blue); font:600 15px ui-monospace,monospace; }
+      .goal { margin-top:26px; padding:19px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+      .goal>.icon { color:var(--coral); width:28px; height:28px; }
+      .goal strong { display:block; font-size:20px; font-weight:550; }
+      .goal .eyebrow { font-size:10px; }
+      .goal-date { margin-left:auto; color:var(--muted); font-size:13px; }
+      .activity { display:flex; gap:28px; padding:24px 0; }
+      .activity strong { font:600 28px/1.2 ui-monospace,monospace; }
+      .activity strong small { font-size:13px; color:var(--muted); font-weight:400; }
+      .activity>div>span { display:block; font-size:12px; margin-top:7px; color:var(--muted); }
+      .week-title { display:flex; justify-content:space-between; align-items:center; margin-top:10px; margin-bottom:12px; }
+      .week-title h2 { font-size:21px; font-weight:600; }
+      .adapted { color:var(--green); font-size:12px; display:flex; align-items:center; gap:5px; }
+      .adapted .icon { width:15px; height:15px; }
+      .plan-row { display:grid; grid-template-columns:42px 4px minmax(0,1fr) 26px; gap:16px; align-items:center; min-height:80px; border-top:1px solid var(--line); }
+      .day { color:var(--muted); font:12px ui-monospace,monospace; }
+      .level { width:4px; height:34px; border-radius:2px; background:var(--green); }
+      .level.tempo { background:var(--coral); }
+      .plan-row strong { display:block; font-size:16px; font-weight:600; }
+      .plan-row small { font-size:13px; color:var(--muted); }
+      .plan-row>.icon { color:var(--muted); width:16px; }
+      .plan-row.changed { background:#eff7f1; padding:0 12px; margin:0 -12px; }
+      .old-plan { color:var(--coral); margin-left:8px; font-size:12px; text-decoration:line-through; }
+      .buttons { padding-top:22px; flex-wrap:wrap; }
+      .buttons button { display:flex; align-items:center; gap:7px; min-height:39px; padding:8px 12px; border:1px solid var(--line); border-radius:5px; background:white; font-size:13px; }
+      .buttons button.primary { color:white; background:var(--green); border-color:var(--green); }
+      .buttons .icon { width:16px; height:16px; }
+      .chat { display:flex; flex-direction:column; padding:30px 26px 26px; border-left:1px solid var(--line); min-width:0; }
+      .chat-title img { width:30px; height:30px; }
+      .chat-title h2 { font-size:18px; font-weight:600; }
+      .chat-title small { font-size:11px; color:var(--green); }
+      .messages { display:flex; flex-direction:column; gap:18px; flex:1; padding:28px 0; min-height:350px; }
+      .message { font-size:15px; line-height:1.6; padding:14px 16px; border-radius:6px; background:#f2f4f2; max-width:95%; overflow-wrap:anywhere; }
+      .message.user { background:#edf0fb; color:#2c4485; align-self:flex-end; }
+      .message.reply { border-left:3px solid var(--green); background:#edf6ef; }
+      .message strong { display:block; color:var(--green); font-size:15px; margin-bottom:5px; }
+      .message small { display:block; margin-top:10px; color:var(--muted); font:10px ui-monospace,monospace; }
+      .composer { display:flex; gap:8px; padding:8px; border:1px solid var(--line); border-radius:6px; background:white; }
+      .composer input { min-width:0; flex:1; border:0; background:transparent; padding:4px; font-size:13px; }
+      .composer button { width:32px; height:32px; display:grid; place-items:center; border:0; background:#202522; color:white; border-radius:4px; }
+      .composer button .icon { width:16px; }
+      .memory { display:flex; justify-content:space-between; gap:10px; border-top:1px solid var(--line); margin-top:18px; padding-top:16px; color:var(--muted); font-size:11px; }
+      .build-flow { display:none; }
+      .render { width:1920px; height:1080px; overflow:hidden; background:#f7f4ed; }
+      .render .video-heading { display:block; height:296px; padding:46px 64px 0; }
+      .video-brand { display:flex; align-items:center; justify-content:space-between; height:58px; }
+      .video-brand strong { font-size:26px; }
+      .video-brand .brand img { width:34px; }
+      .video-brand>span { color:#68645d; font:650 17px ui-monospace,monospace; }
+      .video-heading>.eyebrow { margin-top:30px; font-size:17px; color:#956a28; }
+      .video-heading>h1 { margin-top:12px; font-size:44px; line-height:1.16; font-weight:650; }
+      .video-heading>p { margin-top:14px; color:#68645d; font-size:20px; }
+      .render .app { width:1792px; max-width:none; margin:10px 64px 0; height:644px; box-shadow:0 14px 34px #2c271f10; }
+      .render .topbar { min-height:65px; padding:13px 26px; }
+      .render .workspace { grid-template-columns:230px minmax(0,1fr) 540px; grid-template-rows:minmax(0,1fr); min-height:577px; height:577px; }
+      .render .device { padding:22px 24px; }
+      .render .device h2 { font-size:18px; white-space:nowrap; }
+      .render .section-title { gap:6px; }
+      .render .device-status { display:none; }
+      .render .training { padding:22px 36px; }
+      .render .greeting h1 { font-size:27px; }
+      .render .goal { margin-top:16px; padding:12px 0; }
+      .render .activity { padding:16px 0; }
+      .render .week-title { margin-top:8px; margin-bottom:10px; }
+      .render .plan-row { min-height:58px; }
+      .render .plan-row strong { font-size:20px; }
+      .render .plan-row small { font-size:16px; }
+      .render .goal strong { font-size:22px; }
+      .render .buttons { padding-top:12px; }
+      .render .buttons button { font-size:15px; }
+      .render .chat { position:relative; padding:24px 28px; }
+      .render .messages { min-height:0; padding:20px 0; gap:14px; }
+      .render .message { font-size:18px; padding:12px 16px; }
+      .render .message strong { font-size:18px; }
+      .render .message small { font-size:12px; }
+      .render .composer input { font-size:15px; }
+      .render .build-flow { display:block; position:absolute; inset:24px 28px 90px; background:white; z-index:2; }
+      .build-flow .eyebrow { font-size:13px; }
+      .terminal { margin-top:18px; background:#1c1f23; color:#d9dde3; padding:18px; border-radius:5px; min-height:105px; }
+      .terminal code { display:block; min-height:31px; white-space:nowrap; font:17px/1.6 ui-monospace,monospace; }
+      .terminal small { display:block; margin-top:8px; color:#7fd0aa; font:14px ui-monospace,monospace; }
+      .build-prompt { margin-top:25px; font-size:24px; line-height:1.55; border-left:3px solid #956a28; padding-left:20px; }
+      .build-plan { margin-top:26px; font-size:17px; color:var(--muted); }
+      .render .video-footer { display:block; position:absolute; left:64px; right:64px; bottom:44px; color:#68645d; font:650 13px ui-monospace,monospace; }
+      .embed { width:1792px; height:644px; }
+      .embed .video-heading,.embed .video-footer { display:none; }
+      .embed .app { margin:0; }
+      .video-footer>div { display:flex; justify-content:space-between; }
+      .video-footer .track { height:3px; background:#d9d1c5; margin-top:13px; }
+      .video-footer .progress { height:3px; background:#956a28; }
+      @media (max-width:1250px) { body:not(.render) .workspace { grid-template-columns:200px minmax(0,1fr); } body:not(.render) .chat { grid-column:1 / -1; border-left:0; border-top:1px solid var(--line); } body:not(.render) .messages { min-height:0; } }
+      @media (max-width:680px) { body:not(.render) .app { margin:0; border:0; border-radius:0; } body:not(.render) .workspace { display:block; } body:not(.render) .topbar { flex-wrap:wrap; padding:16px 20px; } body:not(.render) .top-actions { width:100%; justify-content:space-between; gap:8px; } body:not(.render) .device { border-right:0; border-bottom:1px solid var(--line); padding:20px; } body:not(.render) .watch { height:230px; margin:14px auto; } body:not(.render) .device-status { display:none; } body:not(.render) .training,body:not(.render) .chat { padding:26px 20px; } body:not(.render) .greeting h1 { font-size:26px; } body:not(.render) .goal-date { display:none; } body:not(.render) .activity { gap:24px; } }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs><symbol id="footprints" viewBox="0 0 24 24"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"></path><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"></path><path d="M16 17h4"></path><path d="M4 13h4"></path></symbol><symbol id="rotate-ccw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></symbol><symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></symbol><symbol id="flag" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"></path></symbol><symbol id="sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path><path d="M20 2v4"></path><path d="M22 4h-4"></path><circle cx="4" cy="20" r="2"></circle></symbol><symbol id="arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></symbol><symbol id="refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></symbol><symbol id="arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></symbol></defs></svg>
+    <header class="video-heading">
+      <div class="video-brand"><div class="brand"><img src="assets/api-claws.png" alt="" /><strong>Buda API Claws</strong></div><span>04 / 07 · SKILL WORKFLOW</span></div>
+      <div class="eyebrow">SKILL-GUIDED BUILD</div><h1>Let your coding agent handle the integration</h1>
+      <p>Install api-claws-creator, describe your product, and build a training companion.</p>
+    </header>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand"><svg class="icon"><use href="#footprints" /></svg><strong>Stride</strong><small>training companion</small></div>
+        <div class="top-actions"><span class="badge">Preview data</span><div class="users" aria-label="Demo user"><button class="active" data-user="ava">Ava</button><button data-user="liam">Liam</button></div><button class="icon-button" id="reset" title="Reset demo" aria-label="Reset demo"><svg class="icon"><use href="#rotate-ccw" /></svg></button></div>
+      </header>
+      <div class="workspace">
+        <aside class="device">
+          <span class="eyebrow">Connected device</span><div class="section-title"><h2>Orbit One</h2><span class="synced"><svg class="icon"><use href="#check" /></svg> Synced</span></div>
+          <div class="watch" aria-label="Smartwatch showing the latest run"><div class="strap"></div><div class="watch-face"><div class="watch-time">09:41</div><div class="run-ring"><strong data-distance>4.1</strong><span>KILOMETERS</span></div><div class="watch-label">LATEST RUN</div></div></div>
+          <div class="device-stat"><span>Battery</span><strong>82%</strong></div><div class="device-stat"><span>Last sync</span><strong id="sync-time">Yesterday</strong></div>
+          <div class="device-status"><span class="eyebrow">Weekly activity</span><p>3 runs · 12.7 km<br>Moving toward your next milestone.</p></div>
+        </aside>
+        <section class="training">
+          <div class="greeting"><div><span class="eyebrow">Your training workspace</span><h1>Good morning, <span id="name">Ava</span></h1></div><span class="avatar" id="initials">AC</span></div>
+          <div class="goal"><svg class="icon"><use href="#flag" /></svg><div><span class="eyebrow">Current goal</span><strong id="goal">Run my first 10K</strong></div><span class="goal-date">OCT 24</span></div>
+          <div class="activity"><div><strong><span data-distance>4.1</span> <small>km</small></strong><span>Latest run</span></div><div><strong id="pace">6:28 <small>/km</small></strong><span>Average pace</span></div><div><strong>3 <small>runs</small></strong><span>This week</span></div></div>
+          <div class="week-title"><h2 id="plan-title">Next week's plan</h2><span class="adapted" id="adapted" hidden><svg class="icon"><use href="#sparkles" /></svg> Adjusted for you</span></div>
+          <div class="plan-row"><span class="day">MON</span><span class="level"></span><div><strong>Rest &amp; stretch</strong><small>Recovery · 15 minutes</small></div><svg class="icon"><use href="#arrow-right" /></svg></div>
+          <div class="plan-row" id="tuesday"><span class="day">TUE</span><span class="level tempo" id="tuesday-level"></span><div><strong id="tuesday-title">Interval run</strong><small id="tuesday-detail">5 × 800 m · steady effort</small><span class="old-plan" id="old-plan" hidden>5 × 800 m</span></div><svg class="icon"><use href="#arrow-right" /></svg></div>
+          <div class="plan-row"><span class="day">SAT</span><span class="level"></span><div><strong>Long easy run</strong><small>7 km · conversational pace</small></div><svg class="icon"><use href="#arrow-right" /></svg></div>
+          <div class="buttons"><button id="sync"><svg class="icon"><use href="#refresh-cw" /></svg> Sync workout</button><button id="review" class="primary" disabled><svg class="icon"><use href="#sparkles" /></svg> Review next week</button></div>
+        </section>
+        <section class="chat">
+          <div class="chat-title"><img src="assets/api-claws.png" alt="API Claws" /><div><h2>Training companion</h2><small>Personal Agent · private Drive</small></div></div>
+          <div class="messages" aria-live="polite"><p class="message" id="welcome">Your plan is ready. Sync your latest run when you're back.</p><p class="message" id="question" hidden>Today's 5.2 km is in. How did Tuesday feel?</p><p class="message user" id="feedback" hidden>Tuesday felt too hard. I was tired in the second half.</p><p class="message reply" id="reply" hidden><strong>Next week adjusted</strong>Let's make Tuesday a 30-minute easy run. Saturday stays at 7 km.<small>BASED ON YOUR GOAL, WORKOUT &amp; FEEDBACK</small></p></div>
+          <form class="composer" id="composer"><input id="message" aria-label="Message your training companion" placeholder="Message your companion..." autocomplete="off" /><button title="Send message" aria-label="Send message"><svg class="icon"><use href="#arrow-up" /></svg></button></form>
+          <div class="memory"><span>Drive · goals + workouts + feedback</span><span id="memory-status">Ready</span></div>
+          <div class="build-flow" id="build-flow"><span class="eyebrow">01 · INSTALL THE SKILL</span><div class="terminal"><code id="install-command"></code><small id="skill-ready">api-claws-creator · SKILL.md</small></div><div class="build-prompt" id="build-prompt">Add a training companion to this smartwatch app. Use each user's goals, workout history, and feedback to plan next week.</div><p class="build-plan" id="build-plan">Existing app → server integration → Agent + Drive + Session</p></div>
+        </section>
+      </div>
+    </main>
+    <footer class="video-footer"><div><span id="timecode">00:27 / 01:15</span><span>ANIMATED EXAMPLE · API CLAWS CREATOR</span></div><div class="track"><div class="progress" id="progress"></div></div></footer>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const renderMode = params.has("render") || params.has("embed");
+      document.body.classList.toggle("render", renderMode);
+      document.body.classList.toggle("embed", params.has("embed"));
+      const $ = (id) => document.getElementById(id);
+      const profiles = { ava:{name:"Ava",initials:"AC",goal:"Run my first 10K"}, liam:{name:"Liam",initials:"LP",goal:"Build a steady 5K habit"} };
+      const users = { ava:{synced:false,reviewed:false,feedback:""}, liam:{synced:false,reviewed:false,feedback:""} };
+      let selected = "ava";
+      const show = (id, visible) => { $(id).hidden = !visible; };
+      function update(state = users[selected]) {
+        const profile = profiles[selected];
+        $("name").textContent = profile.name; $("initials").textContent = profile.initials; $("goal").textContent = profile.goal;
+        document.querySelectorAll("[data-user]").forEach(button => { button.classList.toggle("active", button.dataset.user === selected); button.setAttribute("aria-pressed", String(button.dataset.user === selected)); });
+        document.querySelectorAll("[data-distance]").forEach(element => element.textContent = state.synced ? "5.2" : "4.1");
+        $("pace").innerHTML = state.synced ? "6:13 <small>/km</small>" : "6:28 <small>/km</small>";
+        $("sync-time").textContent = state.synced ? "Just now" : "Yesterday";
+        $("sync").disabled = state.synced; $("review").disabled = !state.synced || state.reviewed;
+        $("plan-title").textContent = state.reviewed ? "Next week, adjusted" : "Next week's plan";
+        $("tuesday-title").textContent = state.reviewed ? "30-minute easy run" : "Interval run";
+        $("tuesday-detail").textContent = state.reviewed ? "Lower intensity · conversational pace" : "5 × 800 m · steady effort";
+        $("tuesday").classList.toggle("changed", state.reviewed); $("tuesday-level").classList.toggle("tempo", !state.reviewed);
+        show("adapted",state.reviewed); show("old-plan",state.reviewed); show("welcome",!state.synced); show("question",state.synced); show("feedback",Boolean(state.feedback)); show("reply",state.reviewed);
+        $("feedback").textContent = state.feedback;
+        $("memory-status").textContent = state.reviewed ? "Updated" : state.synced ? "Workout saved" : "Ready";
+      }
+      $("sync").onclick = () => { users[selected].synced = true; update(); };
+      $("review").onclick = () => { users[selected].reviewed = true; users[selected].feedback ||= "Tuesday felt too hard. I was tired in the second half."; update(); };
+      $("reset").onclick = () => { users[selected] = {synced:false,reviewed:false,feedback:""}; update(); };
+      document.querySelectorAll("[data-user]").forEach(button => button.onclick = () => { selected = button.dataset.user; update(); });
+      $("composer").onsubmit = event => { event.preventDefault(); const text = $("message").value.trim(); if (!text) return; users[selected].feedback = text; $("message").value = ""; update(); };
+      const clamp = (value) => Math.min(1,Math.max(0,value));
+      const ease = (value) => 1 - (1-clamp(value)) ** 3;
+      window.setSceneTime = ms => {
+        selected = "ava";
+        const t = Math.min(13666.667,Math.max(0,ms));
+        document.querySelector(".app").style.opacity = Math.min(ease(t/600),1-ease((t-13166.667)/500));
+        update({synced:t>=8000, reviewed:t>=11200, feedback:t>=9400 ? "Tuesday felt too hard. I was tired in the second half." : ""});
+        const command = "$ npx skills add buda-ai/api-claws";
+        $("install-command").textContent = command.slice(0,Math.floor(command.length*clamp((t-400)/1800)));
+        $("skill-ready").style.opacity = ease((t-2500)/400);
+        $("build-prompt").style.opacity = ease((t-3212)/500);
+        $("build-plan").style.opacity = ease((t-7100)/400);
+        $("build-flow").style.opacity = 1-ease((t-7900)/600);
+        $("build-flow").style.pointerEvents = t>=8500 ? "none" : "auto";
+        $("progress").style.width = `${(27000+t)/75866.667*100}%`;
+        $("timecode").textContent = `00:${String(Math.floor((27000+t)/1000)).padStart(2,"0")} / 01:15`;
+      };
+      update();
+      window.addEventListener("message", event => {
+        if (event.source === window.parent && event.data?.type === "apiClawsDemoTime" && Number.isFinite(event.data.ms)) window.setSceneTime(event.data.ms);
+      });
+      if (renderMode) window.setSceneTime(0);
+    </script>
+  </body>
+</html>
